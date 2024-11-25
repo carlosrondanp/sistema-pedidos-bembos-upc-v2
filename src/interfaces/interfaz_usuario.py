@@ -1,5 +1,5 @@
-import tkinter as tk
-from tkinter import messagebox
+import ipywidgets as widgets
+from IPython.display import display, clear_output
 from utils.analisis import generar_analisis_estadistico, generar_grafico_barras
 from utils.reportes import generar_reporte
 from controladores.base_datos_usuarios import BaseDatosUsuarios
@@ -10,126 +10,138 @@ class InterfazUsuario:
         self.base_datos_usuarios = BaseDatosUsuarios()
         self.sistema_pedidos = SistemaPedidos()
         self.usuario_actual = None
-        self.root = tk.Tk()
-        self.root.title("Sistema de Pedidos - Login")
+        self.output = widgets.Output()
         self._crear_interfaz_login()
 
     def _crear_interfaz_login(self):
-        frame_login = tk.Frame(self.root)
-        frame_login.pack(pady=20)
+        clear_output(wait=True)
+        with self.output:
+            clear_output(wait=True)
+            usuario_label = widgets.Label("Usuario:")
+            self.usuario_entry = widgets.Text(placeholder="Ingrese su usuario")
 
-        tk.Label(frame_login, text="Usuario").grid(row=0, column=0, padx=5, pady=5)
-        self.usuario_entry = tk.Entry(frame_login)
-        self.usuario_entry.grid(row=0, column=1, padx=5, pady=5)
+            contrasena_label = widgets.Label("Contraseña:")
+            self.contrasena_entry = widgets.Password(placeholder="Ingrese su contraseña")
 
-        tk.Label(frame_login, text="Contraseña").grid(row=1, column=0, padx=5, pady=5)
-        self.contrasena_entry = tk.Entry(frame_login, show="*")
-        self.contrasena_entry.grid(row=1, column=1, padx=5, pady=5)
+            iniciar_sesion_button = widgets.Button(description="Iniciar Sesión", button_style="success")
+            iniciar_sesion_button.on_click(self.iniciar_sesion)
 
-        tk.Button(frame_login, text="Iniciar Sesión", command=self.iniciar_sesion).grid(row=2, column=0, columnspan=2, pady=10)
+            login_ui = widgets.VBox([
+                usuario_label, self.usuario_entry,
+                contrasena_label, self.contrasena_entry,
+                iniciar_sesion_button
+            ])
+            display(login_ui)
 
-    def iniciar_sesion(self):
-        # Verificar credenciales
-        nombre = self.usuario_entry.get()
-        contrasena = self.contrasena_entry.get()
+    def iniciar_sesion(self, _):
+        nombre = self.usuario_entry.value
+        contrasena = self.contrasena_entry.value
         usuario = self.base_datos_usuarios.validar_usuario(nombre, contrasena)
 
-        if usuario:
-            self.usuario_actual = usuario
-            messagebox.showinfo("Inicio de Sesión", f"Bienvenido, {usuario.nombre} ({usuario.rol})")
-            self._mostrar_funcionalidades(usuario.rol)
-        else:
-            messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+        with self.output:
+            clear_output()
+            if usuario:
+                self.usuario_actual = usuario
+                print(f"Bienvenido, {usuario.nombre} ({usuario.rol})")
+                self._mostrar_funcionalidades(usuario.rol)
+            else:
+                print("Error: Usuario o contraseña incorrectos")
 
     def _mostrar_funcionalidades(self, rol):
-        # Limpiar la pantalla anterior
-        for widget in self.root.winfo_children():
-            widget.destroy()
-
-        if rol == "Gerente":
-            self._crear_interfaz_gerente()
-        elif rol == "Cajero":
-            self._crear_interfaz_cajero()
+        clear_output(wait=True)
+        with self.output:
+            if rol == "Gerente":
+                self._crear_interfaz_gerente()
+            elif rol == "Cajero":
+                self._crear_interfaz_cajero()
 
     def _crear_interfaz_gerente(self):
-        frame_gerente = tk.Frame(self.root)
-        frame_gerente.pack(pady=20)
+        opciones_label = widgets.Label("Opciones para Gerente:")
 
-        tk.Label(frame_gerente, text="Opciones para Gerente").pack(pady=10)
-        tk.Button(frame_gerente, text="Ver Análisis", command=self.ver_analisis).pack(pady=5)
-        tk.Button(frame_gerente, text="Generar Reporte", command=self.generar_reporte).pack(pady=5)
-        tk.Button(frame_gerente, text="Cerrar Sesión", command=self.cerrar_sesion).pack(pady=5)
+        ver_analisis_button = widgets.Button(description="Ver Análisis", button_style="info")
+        ver_analisis_button.on_click(self.ver_analisis)
+
+        generar_reporte_button = widgets.Button(description="Generar Reporte", button_style="warning")
+        generar_reporte_button.on_click(self.generar_reporte)
+
+        cerrar_sesion_button = widgets.Button(description="Cerrar Sesión", button_style="danger")
+        cerrar_sesion_button.on_click(self._crear_interfaz_login)
+
+        gerente_ui = widgets.VBox([
+            opciones_label,
+            ver_analisis_button,
+            generar_reporte_button,
+            cerrar_sesion_button
+        ])
+        display(gerente_ui)
 
     def _crear_interfaz_cajero(self):
-        frame_cajero = tk.Frame(self.root)
-        frame_cajero.pack(pady=20)
+        opciones_label = widgets.Label("Opciones para Cajero:")
 
-        tk.Label(frame_cajero, text="Opciones para Cajero").pack(pady=10)
-        tk.Button(frame_cajero, text="Registrar Pedido", command=self.registrar_pedido).pack(pady=5)
-        tk.Button(frame_cajero, text="Ver Pedidos", command=self.ver_registro).pack(pady=5)
-        tk.Button(frame_cajero, text="Cerrar Sesión", command=self.cerrar_sesion).pack(pady=5)
+        registrar_pedido_button = widgets.Button(description="Registrar Pedido", button_style="info")
+        registrar_pedido_button.on_click(self.registrar_pedido)
 
-    def registrar_pedido(self):
-        ventana_registro = tk.Toplevel(self.root)
-        ventana_registro.title("Registrar Pedido")
+        ver_registro_button = widgets.Button(description="Ver Pedidos", button_style="info")
+        ver_registro_button.on_click(self.ver_registro)
 
-        tk.Label(ventana_registro, text="Código").grid(row=0, column=0, padx=5, pady=5)
-        codigo_entry = tk.Entry(ventana_registro)
-        codigo_entry.grid(row=0, column=1, padx=5, pady=5)
+        cerrar_sesion_button = widgets.Button(description="Cerrar Sesión", button_style="danger")
+        cerrar_sesion_button.on_click(self._crear_interfaz_login)
 
-        tk.Label(ventana_registro, text="Producto").grid(row=1, column=0, padx=5, pady=5)
-        producto_entry = tk.Entry(ventana_registro)
-        producto_entry.grid(row=1, column=1, padx=5, pady=5)
+        cajero_ui = widgets.VBox([
+            opciones_label,
+            registrar_pedido_button,
+            ver_registro_button,
+            cerrar_sesion_button
+        ])
+        display(cajero_ui)
 
-        tk.Label(ventana_registro, text="Cantidad").grid(row=2, column=0, padx=5, pady=5)
-        cantidad_entry = tk.Entry(ventana_registro)
-        cantidad_entry.grid(row=2, column=1, padx=5, pady=5)
+    def registrar_pedido(self, _):
+        clear_output()
+        with self.output:
+            codigo_entry = widgets.Text(placeholder="Código del pedido")
+            producto_entry = widgets.Text(placeholder="Producto")
+            cantidad_entry = widgets.IntText(placeholder="Cantidad")
+            precio_entry = widgets.FloatText(placeholder="Precio por kg")
 
-        tk.Label(ventana_registro, text="Precio por kg").grid(row=3, column=0, padx=5, pady=5)
-        precio_entry = tk.Entry(ventana_registro)
-        precio_entry.grid(row=3, column=1, padx=5, pady=5)
+            registrar_button = widgets.Button(description="Registrar", button_style="success")
 
-        def registrar():
-            try:
-                codigo = codigo_entry.get()
-                producto = producto_entry.get()
-                cantidad = int(cantidad_entry.get())
-                precio_kg = float(precio_entry.get())
-                self.sistema_pedidos.agregar_pedido(codigo, producto, cantidad, precio_kg)
-                messagebox.showinfo("Éxito", "Pedido registrado con éxito.")
-                ventana_registro.destroy()
-            except ValueError:
-                messagebox.showerror("Error", "Por favor ingresa datos válidos.")
+            def registrar(_):
+                try:
+                    codigo = codigo_entry.value
+                    producto = producto_entry.value
+                    cantidad = cantidad_entry.value
+                    precio_kg = precio_entry.value
+                    self.sistema_pedidos.agregar_pedido(codigo, producto, cantidad, precio_kg)
+                    print("Pedido registrado con éxito.")
+                except ValueError:
+                    print("Error: Por favor ingresa datos válidos.")
 
-        tk.Button(ventana_registro, text="Registrar", command=registrar).grid(row=4, column=0, columnspan=2, pady=10)
+            registrar_button.on_click(registrar)
 
-    def ver_registro(self):
-        pedidos = self.sistema_pedidos.obtener_registro()
-        
-        if pedidos.empty:
-            messagebox.showinfo("Registro Vacío", "No hay pedidos registrados.")
-            return
-        
-        ventana_pedidos = tk.Toplevel(self.root)
-        ventana_pedidos.title("Registro de Pedidos")
+            registrar_ui = widgets.VBox([
+                widgets.Label("Registrar Pedido"),
+                codigo_entry, producto_entry, cantidad_entry, precio_entry, registrar_button
+            ])
+            display(registrar_ui)
 
-        tk.Label(ventana_pedidos, text="Pedidos Registrados").pack(pady=10)
-        for _, pedido in pedidos.iterrows():
-            texto_pedido = f"{pedido['Codigo']} - {pedido['Producto']} - {pedido['Cantidad']} kg - S/ {pedido['Precio']}"
-            tk.Label(ventana_pedidos, text=texto_pedido).pack()
+    def ver_registro(self, _):
+        clear_output()
+        with self.output:
+            pedidos = self.sistema_pedidos.obtener_registro()
 
-    def ver_analisis(self):
+            if pedidos.empty:
+                print("No hay pedidos registrados.")
+            else:
+                print("Pedidos Registrados:")
+                for _, pedido in pedidos.iterrows():
+                    texto_pedido = f"{pedido['Codigo']} - {pedido['Producto']} - {pedido['Cantidad']} kg - S/ {pedido['Precio']}"
+                    print(texto_pedido)
+
+    def ver_analisis(self, _):
         generar_analisis_estadistico()
         generar_grafico_barras()
+        print("Análisis generado.")
 
-    def generar_reporte(self):
+    def generar_reporte(self, _):
         generar_reporte()
-        messagebox.showinfo("Éxito", "Reporte generado correctamente.")
-
-    def cerrar_sesion(self):
-        self.root.destroy()
-        self.__init__()
-        self.root.mainloop()
-
-    def ejecutar(self):
-        self.root.mainloop()
+        print("Reporte generado correctamente.")
