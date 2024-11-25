@@ -1,4 +1,5 @@
 import ipywidgets as widgets
+from IPython.display import display
 from IPython.display import display, clear_output
 from src.utils.analisis import generar_analisis_estadistico, generar_grafico_barras
 from src.utils.reportes import generar_reporte
