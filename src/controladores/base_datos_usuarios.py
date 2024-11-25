@@ -1,5 +1,5 @@
 import pandas as pd
-from entidades.usuario import Usuario
+from src.entidades.usuario import Usuario
 
 class BaseDatosUsuarios:
     def __init__(self, archivo="data/usuarios.csv"):

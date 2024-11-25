@@ -1,9 +1,9 @@
 import ipywidgets as widgets
 from IPython.display import display, clear_output
-from utils.analisis import generar_analisis_estadistico, generar_grafico_barras
-from utils.reportes import generar_reporte
-from controladores.base_datos_usuarios import BaseDatosUsuarios
-from controladores.sistema_pedidos import SistemaPedidos
+from src.utils.analisis import generar_analisis_estadistico, generar_grafico_barras
+from src.utils.reportes import generar_reporte
+from src.controladores.base_datos_usuarios import BaseDatosUsuarios
+from src.controladores.sistema_pedidos import SistemaPedidos
 
 class InterfazUsuario:
     def __init__(self):

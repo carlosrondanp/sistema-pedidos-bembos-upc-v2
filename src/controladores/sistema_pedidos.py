@@ -1,5 +1,5 @@
-from entidades.pedido import Pedido
-from controladores.base_datos_pedidos import BaseDatosPedidos
+from src.entidades.pedido import Pedido
+from src.controladores.base_datos_pedidos import BaseDatosPedidos
 from datetime import datetime
 
 class SistemaPedidos:
