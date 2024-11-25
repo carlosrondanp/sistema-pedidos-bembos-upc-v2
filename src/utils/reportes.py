@@ -6,12 +6,19 @@ def generar_reporte(archivo_excel="data/pedidos.xlsx", archivo_reporte="data/rep
         if df.empty:
             print("No hay datos disponibles para generar el reporte.")
             return
+        
+        try:
+            df["Hora"] = pd.to_datetime(df["Hora"], format="%H:%M:%S").dt.hour
+        except Exception as e:
+            print("Error al procesar la columna 'Hora': Asegúrate de que esté en formato 'HH:MM:SS'.")
+            print(f"Detalles del error: {e}")
+            return
 
         total_pedidos = len(df)
         total_ingresos = df["Precio"].sum()
         producto_mas_vendido = df["Producto"].value_counts().idxmax()
         cantidad_producto_mas_vendido = df["Producto"].value_counts().max()
-        hora_pico = pd.to_datetime(df["Hora"]).dt.hour.mode()[0]
+        hora_pico = df["Hora"].mode()[0]
 
         resumen = {
             "Total de Pedidos": total_pedidos,

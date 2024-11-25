@@ -119,7 +119,6 @@ class InterfazUsuario:
             tk.Label(ventana_pedidos, text=texto_pedido).pack()
 
     def ver_analisis(self):
-        # Análisis estadístico y grafico
         generar_analisis_estadistico()
         generar_grafico_barras()
 
